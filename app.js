@@ -8,12 +8,16 @@ var Jimp = require("jimp");
 Tips = require('./models/tips');
 User = require('./models/user');
 
+var jwt    = require('jsonwebtoken'); // used to create, sign, and verify tokens
+var config = require('./config'); // get our config file
+
 app.use(bodyparser.json());
 
 
-mongoose.connect('mongodb://localhost:27017/health');
+var port = process.env.PORT || 8080; // used to create, sign, and verify tokens
+mongoose.connect(config.database); // connect to database
+app.set('superSecret', config.secret); // secret variable
 
-var db = mongoose.connection;
 
 app.get("/", function(req,res){
 
@@ -21,9 +25,32 @@ app.get("/", function(req,res){
 
 });
 
+//Middleware
+var apiRoutes = express.Router();
+
+//Add User to System
+
+apiRoutes.post("/user", function(req,res){
+    var user = req.body;
+    User.addUsers(user ,function(err,user){
+
+        if(err){
+
+            res.status(500).json({ error: 'something is wrong',
+                                    Succes:'true',
+                                    message:"User has been Created " });
+        }
+
+        res.json(user);
+    })
+
+
+});
+
+
 
 //Get The tips
-app.get("/api/tips/", function(req,res){
+apiRoutes.get("/tips", function(req,res){
 
     Tips.getTips(function(err,tips){
 
@@ -42,7 +69,7 @@ app.get("/api/tips/", function(req,res){
 
 
 //Insert Tips
-app.post("/api/tips/", function(req,res){
+apiRoutes.post("/tips", function(req,res){
     var tips = req.body;
     Tips.addTips(tips ,function(err,tips){
 
@@ -59,7 +86,7 @@ app.post("/api/tips/", function(req,res){
 
 
 //Update Tips
-app.put("/api/tips/:_id", function(req,res){
+apiRoutes.put("/tips/:_id", function(req,res){
      var id = req.params._id;
     var tips = req.body;
     Tips.editTips(id,tips ,{},function(err,tips){
@@ -77,7 +104,7 @@ app.put("/api/tips/:_id", function(req,res){
 
 
 //Delete Tips
-app.delete("/api/tips/:_id", function(req,res){
+apiRoutes.delete("/tips/:_id", function(req,res){
      var id = req.params._id;
     Tips.deleteTips(id,function(err,tips){
 
@@ -97,7 +124,7 @@ app.delete("/api/tips/:_id", function(req,res){
 
 
 //Tips By ID
-app.get("/api/tips/:_id", function(req,res){
+apiRoutes.get("/tips/:_id", function(req,res){
 
 Tips.getTipsById(req.params._id,function(err,bookid){
 
@@ -119,7 +146,7 @@ res.json(bookid);
 
 
 
-
+app.use('/api', apiRoutes);
 
 
 
@@ -134,5 +161,5 @@ res.send("404 error");
 });
 
 //This is to set the port for listening
-app.listen(3000);
-console.log("Running on PORT 3000");
+app.listen(port);
+console.log('Magic happens at http://localhost:' + port);

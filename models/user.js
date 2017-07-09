@@ -3,11 +3,11 @@ var mongoose = require('mongoose');
 var UserSchema = mongoose.Schema({
 name:{
   type:String
-}
+},
 
 password:{
 type:String
-}
+},
 
 admin:{
 type:Boolean
@@ -30,7 +30,7 @@ module.exports.getUsers= function(callback,limit){
 
 module.exports.addUsers= function(userObject,callback){
 
-User.create(genreObject,callback);
+User.create(userObject,callback);
 
 }
 
