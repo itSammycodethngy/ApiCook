@@ -6,6 +6,7 @@ var bodyparser= require('body-parser');
 var Jimp = require("jimp");
 
 Tips = require('./models/tips');
+User = require('./models/user');
 
 app.use(bodyparser.json());
 
